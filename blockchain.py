@@ -1,5 +1,6 @@
 #a class whose constructor creates an initial emply list(to store our blockchain), and antoher to store the transictions
 class Blockchain(object):
+
     def __init__(self):
         self.chain = []
         self.current_transactions = []
@@ -7,9 +8,22 @@ class Blockchain(object):
     def new_block(self):
         #create a new Block and adds it to the chain 
         pass
-    def new_transaction(self):
-        #add a new method to the list of transactions
-        pass
+    "We need a way of adding transactions to a block to our new transactions function"
+    
+    def new_transaction(self, sender, receiver, amount):
+        """
+        Creates a new transaction to go into the next mined Block
+        :param sender: <str> Address of the Sender
+        :param recipient: <str> Address of the Recipient
+        :param amount: <int> Amount
+        :return: <int> The index of the Block that will hold this transaction
+        """
+        self.current_transactions.append({
+            'sender' :sender,
+            'receiver' : receiver,
+            'amount' : amount,
+        })
+        return self.last_block['index'] + 1
     @staticmethod
     def hash(block):
         #hashes a block
@@ -32,4 +46,3 @@ class Blockchain(object):
         'proof' : 324984774000,
         'previous_hash' :"a77f5cdfa2934df3954a5c7c7da5df1f",
     }
-    
