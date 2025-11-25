@@ -87,8 +87,14 @@ class Blockchain(object):
         ],
         'proof' : 324984774000,
         'previous_hash' :"a77f5cdfa2934df3954a5c7c7da5df1f",
-        #each block within itself contain the hash of its previous block
+        #each block within itself contain the hash of its previous block       
     }
+    def proof_of_work(self,last_proof):
+        """
+        Simple proof of work algorithm:
+        -Find a number p' in such that hash(pp') contains leading 4 zeroes, where p is the preious p'
+        - p is the previous proof
+        """
 #Our blockchain as an API
 
 #Instantiate our Node
