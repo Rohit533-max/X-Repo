@@ -3,8 +3,12 @@
 #creating the first block which has no predecessors, the seed block
 import hashlib
 import json
+from textwrap import dedent
 from time import time
+from uuid import uuid4
 
+from flask import Flask
+from flask.json import jsonify
 
 class Blockchain(object):
 
@@ -85,3 +89,33 @@ class Blockchain(object):
         'previous_hash' :"a77f5cdfa2934df3954a5c7c7da5df1f",
         #each block within itself contain the hash of its previous block
     }
+#Our blockchain as an API
+
+#Instantiate our Node
+app = Flask(__name__)
+
+#Generate a globally unique address for this node
+node_identifier = str(uuid4()).replace('-', '')
+
+#instaniate the blockchain
+blockchain =  Blockchain()
+
+@app.route('/mine', methods = ['GET'])
+def mine():
+    return "We'll mine a new block"
+
+@app.route('/transactions/new', methods =['POST'])
+def new_transaction():
+    return "We'll add a new transaction"
+
+@app.route('/chain', methods =['GET'])
+def full_chain():
+    response = {
+        'chain': blockchain.chain,
+        'length':len(blockchain.chain),
+    }
+    return jsonify(response), 200
+
+if __name__ == '__main__':
+    app.run(host = '0.0.0.0', port =5000)
+
