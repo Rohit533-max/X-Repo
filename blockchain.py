@@ -7,15 +7,84 @@ from textwrap import dedent
 from time import time
 from uuid import uuid4
 
-from flask import Flask
-from flask.json import jsonify
+from flask import Flask , jsonify, request
+
+from urllib.parse import urlparse
+
+import requests
 
 class Blockchain(object):
 
     def __init__(self):
         self.chain = []
         self.current_transactions = []
+        self.nodes = set()
+    
+    def valid_chain(self, chain):
+        """
+        Determine if a given blockchain valid
+        :param chain: <list> a blockchain
+        :return : <bool> True if valid, False if not
+        """
+        last_block = chain[0]
+        current_index = 1
 
+        while current_index < len(chain):
+            block = chain[current_index]
+            print(f'{last_block}')
+            print(f'{block}')
+            print("\n----------\n")
+
+            #check that the hash of the block is correct
+            if block['previous_hash'] != self.hash(last_block):
+                return False
+            
+            #check that the proof of work is correct
+            if not self.valid_proof(last_block['proof'], block['proof']):
+                return False
+            last_block = block
+            current_index +=1
+            return True
+        
+        def resolve_confliccts(self):
+            """
+            This is our Consensus Algorithm, it resolves conflicts
+            by replacing our chain with the longest one in the network.
+            :return: <bool> True if our chain was replaced, False if not
+            """
+
+            neighbours = self.nodes
+            new_chain = None
+
+            #We're only looking for chains longer than ours
+            max_length = len(self.chain)
+
+            # Grab and verify the chains from all the nodes in our network
+            for node in neighbours:
+                response = requests.get(f'http://{node}/chain')
+                
+                if response.status_code == 200:
+                    length = response.json()['length']
+                    chain = response.json()['chain']
+
+                    #check if the length is longer and the cahin is valid
+                    if length > max_length and self.valid_chain(chain):
+                        max_length = length
+                        new_chain = chain
+
+                # Replace our chain if we discovered a new, valid chain longer than our 
+                if new_chain:
+                    self.chain = new_chain
+                    return True
+                return False
+    
+    def register_node(self, address):
+        """
+        Add a new node to the list of nodes
+        :param address: <str> Address of node. EG. 'https:///92.168.0.5:5000'
+        """
+        parsed_url = urlparse(address)
+        self.nodes.add(parsed_url.netloc)
         #creating the seed block
     def new_block(self,proof,previous_hash = None):
         """
@@ -108,11 +177,45 @@ blockchain =  Blockchain()
 
 @app.route('/mine', methods = ['GET'])
 def mine():
-    return "We'll mine a new block"
+    #we run the proof of work algorithm to get the next proof...
+    last_block = blockchain.last_block
+    last_proof = last_block['proof']
+    proof = blockchain.proof_of_work(last_proof)
+
+    #We must receive a reward for finding the proof...
+    #The sender is "0" to signify that this node has mined a new coin.
+    blockchain.new_transaction(
+        sender= "0",
+        recipient=node_identifier,
+        amount=1,
+    )
+
+    #Forge the new Block by adding it to the chain 
+    previous_hash = blockchain.hash(last_block)
+    block = blockchain.new_block(proof, previous_hash)
+
+    response = {
+        'message' : "New Block Forged",
+        'index': block['index'],
+        'transactions': block['transactions'],
+        'proof' : block['proof'],
+        'previous_hash': block['previous_hash'],
+    }
+    return jsonify(response), 200
 
 @app.route('/transactions/new', methods =['POST'])
 def new_transaction():
-    return "We'll add a new transaction"
+    values = request.get_json()
+
+    #check that the required fields are in the post data
+    required = ['sender', 'recipient', 'amount']
+    if not all(k in values for k in required):
+        return 'Missing values', 400
+    
+    #create a new Transaction
+    index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
+    response = {'message': f'Transaction wiil be added to Block {index}'}
+    return jsonify(response), 201
 
 @app.route('/chain', methods =['GET'])
 def full_chain():
