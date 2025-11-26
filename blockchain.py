@@ -46,6 +46,14 @@ class Blockchain(object):
             current_index +=1
             return True
         
+        def register_node(self, address):
+            """
+            Add a new node to the list of nodes
+            :return none
+            """
+            parsed_url = urlparse(address)
+            self.nodes.add(parsed_url.netloc)
+        
         def resolve_confliccts(self):
             """
             This is our Consensus Algorithm, it resolves conflicts
@@ -228,3 +236,4 @@ def full_chain():
 if __name__ == '__main__':
     app.run(host = '0.0.0.0', port =5000)
 
+app.run(debug=True)
