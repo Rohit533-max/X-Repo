@@ -1,0 +1,163 @@
+# 🔍 Hash-Powered Spell Checker
+
+A complete spell checker built **from scratch in Python** to learn core hashing concepts through a real project.
+
+**No external libraries used.** Every data structure is hand-coded.
+
+---
+
+## 📚 Hashing Concepts Covered
+
+| Concept | Where |
+|---|---|
+| Hash Functions (Polynomial Rolling) | `hash_table.py` → `_hash()` |
+| Collision Resolution (Separate Chaining) | `hash_table.py` → `insert()` |
+| Load Factor & Dynamic Rehashing | `hash_table.py` → `_rehash()` |
+| Bloom Filters (probabilistic hashing) | `bloom_filter.py` |
+| Multiple Hash Functions / Double Hashing | `bloom_filter.py` → `_hashes()` |
+| FNV-1a & djb2 Hash Functions | `bloom_filter.py` |
+| Hash Sets (for suggestion candidates) | `spell_checker.py` → `suggest()` |
+| Two-stage lookup (Bloom + Hash Table) | `spell_checker.py` → `is_correct()` |
+
+---
+
+## 🗂 Project Structure
+
+```
+spell_checker_project/
+├── hash_table.py      # Custom hash table with chaining + rehashing
+├── bloom_filter.py    # Bloom filter with k hash functions
+├── spell_checker.py   # Main engine combining both structures
+├── main.py            # CLI interface with multiple modes
+├── tests.py           # Full test suite (19 tests)
+└── README.md
+```
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# Clone and run
+git clone https://github.com/YOUR_USERNAME/hash-spell-checker
+cd hash-spell-checker
+
+# Interactive mode (check words one by one)
+python main.py
+
+# See all hashing concepts demonstrated live
+python main.py --demo
+
+# Check a paragraph of text
+python main.py --text
+
+# Check a file
+python main.py --file myessay.txt
+
+# See internal hash table stats
+python main.py --stats
+
+# Run all tests
+python tests.py
+
+# Load a custom dictionary (one word per line)
+python main.py --words mydict.txt
+```
+
+---
+
+## 🧠 Architecture
+
+```
+User Input
+    │
+    ▼
+SpellChecker.is_correct(word)
+    │
+    ├─► Stage 1: BloomFilter.might_contain(word)
+    │       └── Uses k=7 independent hash functions on bit array
+    │           If NO → definitely misspelled (skip stage 2)
+    │           If MAYBE → proceed to stage 2
+    │
+    └─► Stage 2: HashTable.search(word)
+            └── Polynomial hash → bucket → walk chain
+                Returns True/False (definitive answer)
+```
+
+---
+
+## 🔬 Key Learning Points
+
+### 1. Hash Function
+```python
+def _hash(self, key):
+    PRIME = 31
+    hash_value = 0
+    for i, char in enumerate(key):
+        hash_value += ord(char) * (PRIME ** i)
+    return hash_value % self.capacity
+```
+Maps a string → integer index in O(n) time where n = word length.
+
+### 2. Collision Resolution (Chaining)
+When two words hash to the same bucket, they form a **linked list**:
+```
+bucket[42] → "apple" → "apex" → "apt" → None
+```
+
+### 3. Load Factor & Rehashing
+```
+Load Factor = words_stored / num_buckets
+```
+When load factor > 0.7 → double the bucket array and re-insert everything.
+
+### 4. Bloom Filter
+Uses 7 independent hash functions. Sets 7 bits on insert. Checks all 7 bits on lookup.
+Memory: ~1.2 MB for 100,000 words vs ~5 MB for a plain hash table.
+
+### 5. Spell Suggestions
+Generates all edit-distance-1 candidates (~54n words), then checks each in O(1) using the hash table.
+
+---
+
+## 📊 Sample Stats Output
+
+```
+━━━━━ HASH TABLE STATS ━━━━━
+  Words stored    : 847
+  Buckets (slots) : 2048
+  Load factor     : 0.413
+  Total collisions: 312
+  Times rehashed  : 6
+  Max chain length: 3
+
+━━━━━ BLOOM FILTER STATS ━━━━━
+  Bit array size  : 1,437,759 bits
+  Memory used     : 179,719 bytes
+  Hash functions  : 10
+  Fill ratio      : 0.6%
+  Est. FP rate    : 0.00001
+```
+
+---
+
+## ✅ Tests
+
+```bash
+python tests.py
+```
+Runs 19 tests covering all three modules.
+
+---
+
+## 📖 Further Reading
+
+- [Hash Tables — Wikipedia](https://en.wikipedia.org/wiki/Hash_table)
+- [Bloom Filters — Wikipedia](https://en.wikipedia.org/wiki/Bloom_filter)
+- [Peter Norvig — How to Write a Spelling Corrector](http://norvig.com/spell-correct.html)
+
+---
+
+## 👤 Author
+
+Built as a learning project to understand hashing from the ground up.
