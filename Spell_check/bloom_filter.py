@@ -114,7 +114,7 @@ class BloomFilter:
     def might_contain(self, item: str) -> bool:
         """
         Returns True if item MIGHT be in the set.
-        Returns False if item is DEFINITELY NOT in the set.
+        Returns False if item is DEFINITELY NOT in the set...
         """
         return all(self.bit_array[index] == 1 for index in self._hashes(item))
 
@@ -143,3 +143,4 @@ class BloomFilter:
     def __repr__(self):
         return (f"BloomFilter(size={self.size} bits, k={self.k} hashes, "
                 f"items={self.items_added}, fp≈{self.false_positive_rate})")
+

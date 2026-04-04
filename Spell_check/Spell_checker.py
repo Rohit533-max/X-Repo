@@ -161,7 +161,7 @@ class SpellChecker:
           Stage 2: Hash Table lookup (O(1) average)
                    → Definitive answer
 
-        This two-stage approach is used in real-world systems
+        This two-stage approach is used in real-world systems.
         (e.g., Google Chrome's spell checker).
         """
         word = word.lower().strip()

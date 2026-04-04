@@ -6,7 +6,7 @@ Run with:  python tests.py
 Tests cover:
   - Hash Table operations (insert, search, delete, collision, rehash)
   - Bloom Filter (add, might_contain, false positive estimation)
-  - Spell Checker (is_correct, suggest, check_text)
+  - Spell Checker (is_correct, suggest, check_text).
 """
 
 import sys

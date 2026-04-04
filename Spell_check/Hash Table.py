@@ -188,7 +188,7 @@ class HashTable:
         When load factor exceeds the limit, REHASH:
           1. Double the capacity
           2. Create a new, larger bucket array
-          3. Re-insert ALL existing keys (new hash indices!)
+          3. Re-insert ALL existing keys (new hash indices!).
 
         Why re-insert? Because hash(key) % new_capacity ≠ hash(key) % old_capacity
         """

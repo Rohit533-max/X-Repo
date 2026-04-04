@@ -6,7 +6,7 @@ Usage:
     python main.py
     python main.py --file myessay.txt
     python main.py --demo
-    python main.py --stats
+    python main.py --stats.
 """
 
 import sys
