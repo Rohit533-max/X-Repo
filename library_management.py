@@ -71,7 +71,3 @@ class Library:
             print("Book not found in borrowed books")
 
         
-b = Book("The Great Gatsby","F. Scott Fitzgerald")
-m1 = Member("Alice",1)
-l = Library("City Library")
-l.add_book(b)
