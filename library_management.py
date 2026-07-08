@@ -1,140 +1,545 @@
 class Book:
-    def __init__(self,title,author, category,copies: int):
+
+    def __init__(self, title, author, category, copies):
         self.title = title
         self.author = author
         self.category = category
         self.copies = copies
 
+    def display(self):
+        return f"{self.title} by {self.author} ({self.category})"
+
+
+
 class Member:
-    def __init__(self,name,member_id):
+
+    def __init__(self, name, member_id):
         self.name = name
         self.member_id = member_id
         self.books = []
-            
+
+
     def display_member_info(self):
-        print(f"Member Name: {self.name}")
-        print(f"Member ID: {self.member_id}")
-        if len(self.books) > 0:
+
+        print("\nMember Information")
+        print("------------------")
+        print(f"Name: {self.name}")
+        print(f"ID: {self.member_id}")
+
+
+        if self.books:
+
             print("Borrowed Books:")
+
             for book in self.books:
-                print(f"{book.title}")
+                print(f"- {book.title}")
+
         else:
             print("No books borrowed.")
 
+
+
+
+
 class Library:
-    def __init__(self,name):
+
+
+    def __init__(self, name):
+
         self.name = name
         self.available_books = []
         self.borrowed_books = []
         self.transactions = []
-    
-    def add_book(self,book):
+
+
+
+
+    def add_book(self, book):
+
         for existing_book in self.available_books:
-            if (existing_book.title == book.title and
+
+            if (
+                existing_book.title == book.title and
                 existing_book.author == book.author and
-                existing_book.category == book.category):
+                existing_book.category == book.category
+            ):
+
                 existing_book.copies += book.copies
-                print(f"book : {book.title} \n book copies : {book.copies} ")
+
+                print(
+                    f"{book.copies} copies added to {book.title}"
+                )
+
                 return
+
+
+
         self.available_books.append(book)
-        print(f"{book.title} by {book.author} added to the library.")
 
-    def remove_book(self,book):
+        print(
+            f"{book.title} added to library."
+        )
+
+
+
+
+    def remove_book(self, book):
+
         for existing_book in self.available_books:
-            if existing_book.title == book.title:
 
-                if(existing_book.copies >1):
-                    existing_book.copies -=1
-                    print("Remaining copies are: ", existing_book.copies)
-            self.available_books.remove(book)
-            print(f"Book {book.title} is remvoed completely")
+            if (
+                existing_book.title == book.title and
+                existing_book.author == book.author
+            ):
 
-    def borrow_book(self,book,member,date):
-        if book in self.available_books:
-            self.available_books.remove(book)
-            self.borrowed_books.append(book)
-            member.books.append(book)
-            self.transactions.append({
-                "member" : member.name,
-                "book" : book.title,
-                "date" : date,
-                "action": "borrowed"
-            })
-            print(f"{member.name} borrowed {book.title} on {date}")
-        else:
-            print("Book not available")
 
-    def return_book(self,book,member,date):
-        if book in self.borrowed_books and book in member.books:
-            self.borrowed_books.remove(book)
-            self.available_books.append(book)
-            self.transactions.append({
-                "member" : member.name,
-                "book" : book.title,
-                "date" : date,
-                "action": "returned"
-            })
-            if book in member.books:
-                member.books.remove(book)
-            else:
-                print("Member does not have this book")
-            print(f"{member.name} returned {book.title} on {date}")
-        else:
-            print("Book not found in borrowed books")
+                if existing_book.copies > 1:
+
+                    existing_book.copies -= 1
+
+                    print(
+                        f"One copy removed. Remaining copies: {existing_book.copies}"
+                    )
+
+
+                else:
+
+                    self.available_books.remove(existing_book)
+
+                    print(
+                        f"{book.title} removed completely."
+                    )
+
+
+                return
+
+
+
+        print("Book not found.")
+
+
+
+
+
+    def borrow_book(self, book, member, date):
+
+
+        for existing_book in self.available_books:
+
+
+            if (
+                existing_book.title == book.title and
+                existing_book.author == book.author and
+                existing_book.category == book.category
+            ):
+
+
+                if existing_book.copies <= 0:
+
+                    print("Book unavailable.")
+
+                    return
+
+
+
+                # check duplicate borrowing
+
+                for borrowed in member.books:
+
+                    if (
+                        borrowed.title == existing_book.title and
+                        borrowed.author == existing_book.author
+                    ):
+
+                        print(
+                            f"{member.name} already borrowed this book."
+                        )
+
+                        return
+
+
+
+
+                # decrease available copies
+
+                existing_book.copies -= 1
+
+
+
+                # add book to member
+
+                member.books.append(existing_book)
+
+
+
+                # store borrowed record
+
+                self.borrowed_books.append(
+                    {
+                        "book": existing_book,
+                        "member": member,
+                        "date": date
+                    }
+                )
+
+
+
+                # store transaction
+
+                self.transactions.append(
+                    {
+                        "member": member.name,
+                        "book": existing_book.title,
+                        "date": date,
+                        "action": "Borrowed"
+                    }
+                )
+
+
+
+                print(
+                    f"{member.name} borrowed {existing_book.title}"
+                )
+
+
+
+                # remove if no copies left
+
+                if existing_book.copies == 0:
+
+                    self.available_books.remove(existing_book)
+
+
+
+                return
+
+
+
+
+        print("Book not found.")
+
+
+
+
+
+
+
+    def return_book(self, book, member, date):
+
+
+        borrowed_record = None
+
+
+
+        for record in self.borrowed_books:
+
+
+            if (
+                record["member"] == member and
+                record["book"].title == book.title
+            ):
+
+                borrowed_record = record
+                break
+
+
+
+
+        if borrowed_record is None:
+
+            print(
+                f"{member.name} did not borrow this book."
+            )
+
+            return
+
+
+
+
+        returned_book = borrowed_record["book"]
+
+
+
+
+        # remove from member
+
+        member.books.remove(returned_book)
+
+
+
+        # remove borrowed record
+
+        self.borrowed_books.remove(borrowed_record)
+
+
+
+
+        # add copy back
+
+        found = False
+
+
+
+        for existing_book in self.available_books:
+
+
+            if (
+                existing_book.title == returned_book.title and
+                existing_book.author == returned_book.author and
+                existing_book.category == returned_book.category
+            ):
+
+
+                existing_book.copies += 1
+
+                found = True
+
+                break
+
+
+
+
+        if not found:
+
+
+            returned_book.copies = 1
+
+            self.available_books.append(returned_book)
+
+
+
+
+        self.transactions.append(
+            {
+                "member": member.name,
+                "book": returned_book.title,
+                "date": date,
+                "action": "Returned"
+            }
+        )
+
+
+
+        print(
+            f"{member.name} returned {returned_book.title}"
+        )
+
+
+
+
+
+
 
     def display_available_books(self):
-        if self.available_books:
-            print("Available books: ")
-            for book in self.available_books:
-                print(f"{book.title} by {book.author} copies: {book.copies} ({book.category})")
-        else:
-            print("No books available!")
+
+        print("\nAvailable Books")
+        print("----------------")
+
+
+        if not self.available_books:
+
+            print("No books available.")
+
+            return
+
+
+
+        for book in self.available_books:
+
+            print(
+                f"{book.title} | "
+                f"{book.author} | "
+                f"{book.category} | "
+                f"Copies: {book.copies}"
+            )
+
+
+
+
+
+
+
     def display_borrowed_books(self):
-        if self.borrowed_books:
-            print("Borrowed books: ")
-            for book in self.borrowed_books:
-                print(f"{book.title} by {book.author} copies: {book.copies} ({book.category})")
+
+        print("\nBorrowed Books")
+        print("----------------")
+
+
+        if not self.borrowed_books:
+
+            print("No borrowed books.")
+
+            return
+
+
+
+        for record in self.borrowed_books:
+
+            print(
+                f"{record['book'].title} borrowed by {record['member'].name}"
+            )
+
+
+
+
+
+
+
     def transaction_history(self):
-        if self.transactions:
-            print("Transactions are : ")
-            for transaction in self.transactions:
-                print(f"{transaction['member']} "
-                      f"{transaction['book']} "
-                      f"{transaction['date']} "
-                      f"{transaction['action']} ")
-                
-    def get_books_by_category(self,category):
-        books = [book for book in self.available_books if book.category.lower() == category.lower()]
 
-        if books:
-            for book in books:
-                print(f"{book.title} by {book.author}")
-        else:
-            print(f"No books of category: {category} if available")
+        print("\nTransaction History")
+        print("-------------------")
 
 
-#book copies remains to update
+        if not self.transactions:
 
-# book1 = Book("Python Programming", "John Smith", "Programming",2)
-# book2 = Book("Data Science", "Alice Brown", "Technology",1)
-# book3 = Book("Applied Matametics", "Ramanujan", "Maths",1)
+            print("No transactions.")
 
-# member1 = Member("Ali", 101)
+            return
 
-# library = Library("City Library")
 
-# library.add_book(book1)
-# library.add_book(book2)
-# library.add_book(book3)
 
-# # library.display_available_books()
+        for transaction in self.transactions:
 
-# # library.borrow_book(book1, member1, "07-07-2026")
+            print(
+                f"{transaction['member']} | "
+                f"{transaction['book']} | "
+                f"{transaction['date']} | "
+                f"{transaction['action']}"
+            )
 
-# # member1.display_member_info()
 
-# # library.return_book(book1, member1, "10-07-2026")
 
-# # library.transaction_history()
 
-# library.get_books_by_category("Maths")
+
+
+
+    def get_books_by_category(self, category):
+
+
+        print(
+            f"\nBooks in category: {category}"
+        )
+
+
+        found = False
+
+
+
+        for book in self.available_books:
+
+
+            if book.category.lower() == category.lower():
+
+                print(
+                    book.display()
+                )
+
+                found = True
+
+
+
+
+        if not found:
+
+            print("No books found.")
+
+
+
+
+
+
+
+# ================= TESTING =================
+
+
+
+book1 = Book(
+    "Python Programming",
+    "John Smith",
+    "Programming",
+    2
+)
+
+
+book2 = Book(
+    "Data Science",
+    "Alice Brown",
+    "Technology",
+    1
+)
+
+
+book3 = Book(
+    "Mathematics",
+    "Ramanujan",
+    "Maths",
+    1
+)
+
+
+
+member1 = Member(
+    "Ali",
+    101
+)
+
+
+
+library = Library(
+    "City Library"
+)
+
+
+
+library.add_book(book1)
+library.add_book(book2)
+library.add_book(book3)
+
+
+
+library.display_available_books()
+
+
+
+library.borrow_book(
+    book1,
+    member1,
+    "08-07-2026"
+)
+
+
+
+member1.display_member_info()
+
+
+
+library.display_available_books()
+
+
+
+library.display_borrowed_books()
+
+
+
+library.return_book(
+    book1,
+    member1,
+    "10-07-2026"
+)
+
+
+
+library.display_available_books()
+
+
+
+library.display_borrowed_books()
+
+
+
+library.transaction_history()
+
+
+
+library.get_books_by_category("Maths")
