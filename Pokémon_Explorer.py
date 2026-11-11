@@ -39,6 +39,7 @@ def compare_pokemon(name1, name2):
         "pokemon1": basic_info(pokemon1),
 
         "pokemon2": basic_info(pokemon2)
+        
     }
 
 

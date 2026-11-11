@@ -13,7 +13,8 @@ try:
     r = requests.get(url,params=p)
     r.raise_for_status()
     data = r.json()
-    print(f"{city}: {data['main']['temp']}°C {data['weather'][0]['description']}")
+    #print(f"{city}: {data['main']['temp']}°C {data['weather'][0]['description']}")
+    print(data)
     
 
 
