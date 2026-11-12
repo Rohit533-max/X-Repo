@@ -1,121 +1,50 @@
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
 #app object that we use to define our routes
 app = FastAPI()
 
+# to access any file of the static folder in /static in browser
+app.mount("/static",StaticFiles(directory="static"), name="static")
 
+#creating a templates obj which looks in our Template directory
+templates = Jinja2Templates(directory="Templates")
 
-students = [
+posts: list[dict] =[
     {
-        "id": 1,
-        "name": "Rahul Sharma",
-        "email": "rahul@gmail.com",
-        "age": 21,
-        "course": "Computer Science",
-        "city": "Chandigarh",
-        "is_active": True,
-        "marks": 85.5
+        "id" : 1,
+        "author" : "Corey Schafer",
+        "title" : "FastAPI is Awesome",
+        "content" : "This Framework is really easy to use and super fast.",
+        "date_posted" : "April 20, 2025",
     },
     {
-        "id": 2,
-        "name": "Priya Verma",
-        "email": "priya@gmail.com",
-        "age": 22,
-        "course": "Information Technology",
-        "city": "Delhi",
-        "is_active": True,
-        "marks": 91.0
+        "id" : 2,
+        "author" : "Raj Shamani",
+        "title" : "Welcome to our Podcast",
+        "content" : "Taking about how to fix the tissue issue",
+        "date_posted" : "November 12, 2026",
     },
     {
-        "id": 3,
-        "name": "Aman Singh",
-        "email": "aman@gmail.com",
-        "age": 20,
-        "course": "Mechanical Engineering",
-        "city": "Ludhiana",
-        "is_active": False,
-        "marks": 76.5
+        "id" : 3,
+        "author" : "Kamlesh",
+        "title" : "Trending",
+        "content" : "Instagram feed is not good these days.",
+        "date_posted" : "November 7, 2026",
     },
-    {
-        "id": 4,
-        "name": "Neha Gupta",
-        "email": "neha@gmail.com",
-        "age": 23,
-        "course": "Computer Science",
-        "city": "Amritsar",
-        "is_active": True,
-        "marks": 88.0
-    },
-    {
-        "id": 5,
-        "name": "Arjun Patel",
-        "email": "arjun@gmail.com",
-        "age": 21,
-        "course": "Data Science",
-        "city": "Mumbai",
-        "is_active": True,
-        "marks": 79.5
-    },
-    {
-        "id": 6,
-        "name": "Simran Kaur",
-        "email": "simran@gmail.com",
-        "age": 22,
-        "course": "Information Technology",
-        "city": "Patiala",
-        "is_active": False,
-        "marks": 94.0
-    },
-    {
-        "id": 7,
-        "name": "Karan Mehta",
-        "email": "karan@gmail.com",
-        "age": 24,
-        "course": "Business Administration",
-        "city": "Jaipur",
-        "is_active": True,
-        "marks": 82.0
-    },
-    {
-        "id": 8,
-        "name": "Anjali Sharma",
-        "email": "anjali@gmail.com",
-        "age": 20,
-        "course": "Data Science",
-        "city": "Mohali",
-        "is_active": True,
-        "marks": 89.5
-    },
-    {
-        "id": 9,
-        "name": "Vikram Kumar",
-        "email": "vikram@gmail.com",
-        "age": 23,
-        "course": "Computer Science",
-        "city": "Jalandhar",
-        "is_active": False,
-        "marks": 68.0
-    },
-    {
-        "id": 10,
-        "name": "Pooja Verma",
-        "email": "pooja@gmail.com",
-        "age": 21,
-        "course": "Information Technology",
-        "city": "Delhi",
-        "is_active": True,
-        "marks": 92.5
-    }
 ]
 
 
 #creating route
-@app.get("/", response_class=HTMLResponse)
+#include in schema to keep this page out of our API docs
+@app.get("/", include_in_schema=False, name="home")
 
-def home():
-    return f"<h1>{students[0]['name']}</h1>"
-    #we are just returning a simple dictionary here, the fast api automatically convert it into JSON.
+# passing a request parameter for Jinja2 to access the html file
+# home.html is the name of our template
+def home(request: Request):
+    return templates.TemplateResponse(request, "home.html", {"posts":posts, "title": "Home"})
 
-@app.get("/api/students")
-def get_students():
-    return students
+@app.get("/api/posts")
+def get_posts():
+    return posts
