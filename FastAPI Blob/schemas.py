@@ -16,7 +16,7 @@ class UserResponse(UserBase):
 
     id:int
     image_file: str | None
-    image_path: str
+    image_path: str | None
 
 class UserUpdate(BaseModel):
     username: str | None = Field(default=None,min_length=1, max_length=20)

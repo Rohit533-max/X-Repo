@@ -6,6 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from typing import Annotated
+from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 import models
@@ -28,7 +29,9 @@ app = FastAPI()
 # to access any file of the static folder in /static in browser
 app.mount("/static",StaticFiles(directory="static"), name="static")
 
-app.mount("/media", StaticFiles(directory="media"), name= "media")
+MEDIA_DIR = Path(__file__).resolve().parent / "media"
+MEDIA_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 #creating a templates obj which looks in our Template directory
 templates = Jinja2Templates(directory="Templates")
 
@@ -80,7 +83,7 @@ def user_posts_page(
     posts = result.scalars().all()
     return templates.TemplateResponse(
         request,
-        "user_posts.html",
+        "user_post.html",
         {"posts": posts, "user": user, "title": f"{user.username}'s Posts"},
     )
 @app.post(
@@ -143,6 +146,7 @@ def get_user_posts(user_id: int, db:Annotated[Session, Depends(get_db)]):
     return posts
 
 
+
 ## update_user
 @app.patch("/api/users/{user_id}", response_model=UserResponse)
 def update_user(
@@ -190,6 +194,22 @@ def update_user(
     db.commit()
     db.refresh(user)
     return user
+
+
+
+## delete_user
+@app.delete("/api/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(user_id: int, db: Annotated[Session, Depends(get_db)]):
+    result = db.execute(select(models.User).where(models.User.id == user_id))
+    user = result.scalars().first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    db.delete(user)
+    db.commit()
 
 ## get_posts
 @app.get("/api/posts", response_model=list[PostResponse])
@@ -331,3 +351,5 @@ def validation_exception_handler(request:Request, exception: RequestValidationEr
         },
         status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
     )
+
+
